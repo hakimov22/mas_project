@@ -1,0 +1,65 @@
+@startuml TravelAgencyUseCaseDiagram
+title Travel Agency Reservation System - Use Case Diagram
+
+' =====================================
+' ACTORS
+' =====================================
+actor Customer as C
+actor Admin as A
+
+' =====================================
+' SYSTEM BOUNDARY
+' =====================================
+rectangle "Travel Agency Reservation System" as SYS {
+    usecase "Browse Trips" as UC_BrowseTrips
+    usecase "Filter Trips by Destination" as UC_FilterTrips
+    usecase "View Trip Details" as UC_ViewDetails
+    usecase "Make Reservation" as UC_MakeReservation
+    usecase "View My Reservations" as UC_ViewReservations
+    usecase "Cancel Reservation" as UC_CancelReservation
+    usecase "Calculate Price" as UC_CalculatePrice
+    usecase "Manage Destinations" as UC_ManageDestinations
+    usecase "Manage Trips" as UC_ManageTrips
+    usecase "Manage Flights" as UC_ManageFlights
+    usecase "Manage Customers" as UC_ManageCustomers
+    usecase "View All Reservations" as UC_ViewAllReservations
+    usecase "Update Reservation Status" as UC_UpdateReservation
+    usecase "Record Payment" as UC_RecordPayment
+}
+
+' =====================================
+' ASSOCIATIONS
+' =====================================
+C --> UC_BrowseTrips
+C --> UC_FilterTrips
+C --> UC_ViewDetails
+C --> UC_MakeReservation
+C --> UC_ViewReservations
+C --> UC_CancelReservation
+
+A --> UC_ManageDestinations
+A --> UC_ManageTrips
+A --> UC_ManageFlights
+A --> UC_ManageCustomers
+A --> UC_ViewAllReservations
+A --> UC_UpdateReservation
+A --> UC_RecordPayment
+
+' =====================================
+' INCLUDE & EXTEND RELATIONSHIPS
+' =====================================
+UC_MakeReservation .> UC_CalculatePrice : <<include>>
+UC_RecordPayment .> UC_UpdateReservation : <<include>>
+UC_CancelReservation .> UC_ViewReservations : <<extend>>
+
+' =====================================
+' STYLING
+' =====================================
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #E3F2FD
+skinparam usecaseBorderColor #1565C0
+skinparam actorBorderColor #F57C00
+skinparam actorBackgroundColor #FFF8E1
+skinparam shadowing false
+
+@enduml

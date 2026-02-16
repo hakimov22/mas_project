@@ -1,0 +1,8 @@
+target/
+frontend/node_modules/
+data/
+.cursor/
+.vscode/
+*.pdf
+.DS_Store
+Thumbs.db

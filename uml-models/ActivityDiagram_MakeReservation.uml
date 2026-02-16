@@ -1,0 +1,72 @@
+' =========================================
+' Project: Travel Agency Reservation System
+' Diagram: Activity Diagram - Make Reservation (CUC-04)
+' Author: Abdulkhakim Khakimov s22816
+' Date: 2026-01-07
+' =========================================
+
+@startuml ActivityDiagram_MakeReservation
+
+skinparam backgroundColor #FEFEFE
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityBorderColor #1565C0
+skinparam activityDiamondBackgroundColor #FFF8E1
+skinparam activityDiamondBorderColor #F57C00
+skinparam swimlaneBorderColor #1565C0
+
+title Activity Diagram - CUC-04: Make Reservation
+
+|Customer|
+start
+
+:View available trips;
+
+:Select a trip;
+
+|System|
+:Display trip details;
+
+|Customer|
+:Click "Book Now";
+
+|System|
+:Display booking form;
+
+|Customer|
+:Enter number of people;
+:Click "Confirm";
+
+|System|
+if (Enough available spots?) then (yes)
+else (no)
+    :Display error message\n"Not enough spots available";
+    |Customer|
+    :View error;
+    :Correct number of people;
+    |System|
+    :Display booking form;
+    note right
+        Return to enter
+        number of people
+    end note
+    detach
+endif
+
+:Calculate total price\n(trip.getFinalPrice() × numberOfPeople);
+
+:Generate unique reservation number;
+
+:Create Reservation\nstatus = PENDING;
+
+:Establish bidirectional links\n(Customer ↔ Reservation ↔ Trip);
+
+:Add Reservation to class extent;
+
+:Display confirmation\n(reservation number, total price, status);
+
+|Customer|
+:View confirmation;
+
+stop
+
+@enduml

@@ -1,0 +1,224 @@
+@startuml TravelAgencyReservationSystem
+title Travel Agency Reservation System - Design Class Diagram
+
+' Style like the image
+skinparam backgroundColor #F5F5F5
+skinparam classBackgroundColor #E3F2FD
+skinparam classBorderColor #1976D2
+skinparam classArrowColor #333333
+skinparam abstractClassBackgroundColor #FFF8E1
+skinparam abstractClassBorderColor #F9A825
+skinparam enumBackgroundColor #E8F5E9
+skinparam enumBorderColor #388E3C
+skinparam shadowing true
+skinparam roundcorner 5
+skinparam nodesep 80
+skinparam ranksep 60
+skinparam linetype ortho
+skinparam dpi 150
+skinparam classAttributeIconSize 0
+skinparam classFontSize 10
+
+' ================================
+' Enumerations
+' ================================
+enum ReservationStatus <<enum>> {
+    PENDING
+    CONFIRMED
+    COMPLETED
+    CANCELLED
+}
+
+enum PaymentMethod <<enum>> {
+    CASH
+    BANK_TRANSFER
+}
+
+enum DifficultyLevel <<enum>> {
+    EASY
+    MEDIUM
+    HARD
+}
+
+enum UserRole <<enum>> {
+    CUSTOMER
+    ADMIN
+}
+
+' ================================
+' Value Object
+' ================================
+class Address <<value>> {
+    - street: String
+    - city: String
+    - postalCode: String
+    - country: String
+    + getFullAddress(): String
+}
+
+' ================================
+' User Hierarchy
+' ================================
+abstract class User {
+    # userId: Long
+    # username: String
+    # password: String
+    # role: UserRole
+    + {abstract} getDisplayName(): String
+}
+
+class Customer {
+    - customerId: Long
+    - firstName: String
+    - lastName: String
+    - email: String
+    - phone: String
+    - address: Address
+    - registrationDate: LocalDate
+    + Customer(id, firstName, lastName, email, phone, address)
+    + Customer(id, firstName, lastName, email, address)
+    + getDisplayName(): String
+    + getFullName(): String
+    + addReservation(r: Reservation): void
+    + removeReservation(r: Reservation): void
+    + hasBookedTrip(trip: Trip): boolean
+}
+
+class Admin {
+    - adminId: Long
+    - employeeId: String
+    - department: String
+    + getDisplayName(): String
+    + createTrip(trip: Trip): void
+    + updateTrip(trip: Trip): void
+    + deleteTrip(tripId: Long): void
+    + updateReservationStatus(r: Reservation, s: ReservationStatus): void
+    + recordPayment(r: Reservation, p: Payment): void
+}
+
+' ================================
+' Trip Hierarchy
+' ================================
+abstract class Trip {
+    # tripId: Long
+    # tripCode: String
+    # name: String
+    # description: String
+    # basePrice: BigDecimal
+    # departureDate: LocalDate
+    # returnDate: LocalDate
+    # maxParticipants: int
+    + {abstract} getFinalPrice(): BigDecimal
+    + {abstract} getTripType(): String
+    + getDuration(): int
+    + isAvailable(): boolean
+    + isAvailable(checkDate: LocalDate): boolean
+    + getAvailableSpots(): int
+    + hasEnoughSpots(people: int): boolean
+    + addReservation(r: Reservation): void
+    + removeReservation(r: Reservation): void
+}
+
+class AdventureTrip {
+    - difficultyLevel: DifficultyLevel
+    - equipmentIncluded: boolean
+    - {static} PRICE_MULTIPLIER: float
+    + getFinalPrice(): BigDecimal
+    + getTripType(): String
+}
+
+class CulturalTrip {
+    - guidedTours: boolean
+    - historicalSites: List<String> {ordered}
+    - {static} PRICE_MULTIPLIER: float
+    + getFinalPrice(): BigDecimal
+    + getTripType(): String
+    + addHistoricalSite(site: String): void
+    + getHistoricalSite(index: int): String
+    + getHistoricalSites(): List<String>
+}
+
+class VacationTrip {
+    - resortName: String
+    - allInclusive: boolean
+    - {static} PRICE_MULTIPLIER: float
+    + getFinalPrice(): BigDecimal
+    + getTripType(): String
+}
+
+' ================================
+' Other Entities
+' ================================
+class Destination {
+    - destinationId: Long
+    - name: String
+    - country: String
+    - description: String
+    - climate: String
+    + addTrip(trip: Trip): void
+    + removeTrip(trip: Trip): void
+    + getAvailableTrips(): List<Trip>
+}
+
+class Flight {
+    - flightId: Long
+    - flightNumber: String
+    - airline: String
+    - departureAirport: String
+    - arrivalAirport: String
+    - departureTime: LocalDateTime
+    - arrivalTime: LocalDateTime
+    + getFlightDuration(): Duration
+}
+
+class Reservation {
+    - reservationId: Long
+    - reservationNumber: String
+    - bookingDate: LocalDate
+    - status: ReservationStatus
+    - numberOfPeople: int
+    + getTotalPrice(): BigDecimal
+    + canRefund(): boolean
+    + cancel(): void
+    + confirm(): void
+    + complete(): void
+    + recordPayment(p: Payment): void
+}
+
+class Payment {
+    - paymentId: Long
+    - amount: BigDecimal
+    - method: PaymentMethod {XOR}
+    - paymentDate: LocalDate
+    - transactionReference: String
+    + validate(): void
+    + isValid(): boolean
+    + setMethod(method: PaymentMethod): void
+}
+
+' ================================
+' Inheritance (Generalization)
+' ================================
+User <|-- Customer
+User <|-- Admin
+Trip <|-- AdventureTrip
+Trip <|-- CulturalTrip
+Trip <|-- VacationTrip
+
+note top of Trip : {disjoint}\nA Trip can be exactly\none of: AdventureTrip,\nCulturalTrip, or VacationTrip
+
+' ================================
+' Associations
+' ================================
+Customer "1" --> "*" Reservation : makes
+Admin "1" ..> "*" Reservation : manages
+Admin "1" ..> "*" Trip : creates
+Reservation "*" --> "1" Trip : for
+Trip "*" --> "1" Destination : locatedIn
+Trip "1" --> "1" Flight : uses
+Reservation "1" *--> "0..1" Payment
+Customer "1" *--> "1" Address
+
+note right of Payment : {XOR}\nPayment method must be\nexactly one of:\nCASH or BANK_TRANSFER
+
+@enduml

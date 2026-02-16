@@ -1,0 +1,57 @@
+@startuml StateDiagram_Reservation
+
+' Professional Style
+skinparam backgroundColor White
+skinparam stateBackgroundColor #F5F5F5
+skinparam stateBorderColor #424242
+skinparam stateArrowColor #424242
+skinparam stateFontColor #212121
+skinparam shadowing false
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam nodesep 120
+skinparam ranksep 80
+
+title State Diagram - Reservation Lifecycle
+
+[*] --> PENDING : create()
+
+state PENDING {
+    PENDING : Awaiting payment
+    PENDING : --
+    PENDING : entry/ generateReservationNumber()
+    PENDING : entry/ setBookingDate(today)
+    PENDING : entry/ calculateTotalPrice()
+}
+
+PENDING -left-> CANCELLED : cancel()
+PENDING -right-> CONFIRMED : recordPayment() [payment valid]
+
+state CANCELLED {
+    CANCELLED : Reservation cancelled
+}
+
+state CONFIRMED {
+    CONFIRMED : Payment received
+    CONFIRMED : --
+    CONFIRMED : entry/ linkPayment()
+}
+
+CONFIRMED -down-> COMPLETED : complete() [tripDate passed]
+CONFIRMED -left-> CANCELLED : cancel() [canRefund]
+
+state COMPLETED {
+    COMPLETED : Trip finished
+}
+
+CANCELLED -down-> [*]
+COMPLETED -down-> [*]
+
+legend right
+  | Action | Description |
+  | cancel() | Customer/Admin can cancel anytime |
+  | canRefund | True if >= 10 days before departure |
+endlegend
+
+@enduml

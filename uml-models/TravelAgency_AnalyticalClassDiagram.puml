@@ -1,0 +1,124 @@
+@startuml TravelAgencyAnalyticalClassDiagram
+title Travel Agency Reservation System - Analytical Class Diagram
+
+' Style - Light green theme
+skinparam backgroundColor #FAFAFA
+skinparam classBackgroundColor #E8F5E9
+skinparam classBorderColor #4CAF50
+skinparam classArrowColor #333333
+skinparam abstractClassBackgroundColor #FFF3E0
+skinparam abstractClassBorderColor #FF9800
+skinparam shadowing true
+skinparam roundcorner 5
+skinparam nodesep 80
+skinparam ranksep 60
+skinparam linetype ortho
+
+' ================================
+' Classes
+' ================================
+class User {
+    username
+    password
+    role
+}
+
+class Customer {
+    name
+    email
+    phone
+    address
+}
+
+class Admin {
+    employeeId
+    department
+}
+
+class Reservation {
+    reservationNumber
+    date
+    status
+    numberOfPeople
+}
+
+class Payment {
+    amount
+    method {XOR}
+    paymentDate
+    transactionReference
+}
+
+abstract class Trip {
+    tripCode
+    name
+    basePrice
+    departureDate
+    returnDate
+    maxParticipants
+}
+
+class AdventureTrip {
+    difficultyLevel
+    equipmentIncluded
+}
+
+class CulturalTrip {
+    guidedTours
+    historicalSites {ordered}
+}
+
+class VacationTrip {
+    resortName
+    allInclusive
+}
+
+class Flight {
+    flightNumber
+    departureAirport
+    arrivalAirport
+    departureTime
+    arrivalTime
+}
+
+class Destination {
+    name
+    country
+    description
+}
+
+' ================================
+' Inheritance (Generalization)
+' ================================
+User <|-- Customer
+User <|-- Admin
+Trip <|-- AdventureTrip
+Trip <|-- CulturalTrip
+Trip <|-- VacationTrip
+
+' Position Trip subclasses below Trip
+Trip -[hidden]down- AdventureTrip
+AdventureTrip -[hidden]down- CulturalTrip
+CulturalTrip -[hidden]down- VacationTrip
+
+' ================================
+' Associations
+' ================================
+Customer "1" --> "*" Reservation : makes
+Admin "1" --> "*" Reservation : manages
+Admin "1" --> "*" Trip : creates
+Reservation "*" --> "1" Trip : for
+Reservation "1" --> "0..1" Payment : has
+
+note right of Payment : {XOR}\nPayment method must be\nexactly one of:\nCASH or BANK_TRANSFER
+
+' Position Flight above Destination, both to the right of Trip
+Trip -[hidden]right- Flight
+Flight -[hidden]down- Destination
+
+Trip "1" -right-> "1" Flight : includes
+Trip "1" -right-> "1" Destination : locatedIn
+
+note top of Trip : {disjoint}\nA Trip can be exactly\none of: AdventureTrip,\nCulturalTrip, or VacationTrip
+
+@enduml
